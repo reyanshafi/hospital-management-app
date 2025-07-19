@@ -1,0 +1,14 @@
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongoose";
+// @ts-ignore
+const Patient = require("@/models/Patient");
+
+export async function GET() {
+  try {
+    await connectToDatabase();
+    const patients = await Patient.find({});
+    return NextResponse.json({ patients });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
+  }
+}
