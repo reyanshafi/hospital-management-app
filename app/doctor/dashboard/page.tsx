@@ -29,28 +29,31 @@ export default function DoctorDashboard() {
     }
   }, []);
 
-  // Real-time fetch for appointments, alerts, and patients
+  // Use doctorName for all relevant fetches
+  const doctorName = userData?.name;
+  // Appointments
   const { data: appointmentsData, isLoading: appointmentsLoading } = useSWR(
-    userData?.email ? `/api/doctor/appointments?doctorEmail=${encodeURIComponent(userData.email)}` : null,
+    doctorName ? `/api/doctor/appointments?doctorName=${encodeURIComponent(doctorName)}` : null,
     (url) => fetch(url).then(res => res.json())
   );
+  // Patients
+  const { data: patientsData, isLoading: patientsLoading } = useSWR(
+    doctorName ? `/api/doctor/patients?doctorName=${encodeURIComponent(doctorName)}` : null,
+    (url) => fetch(url).then(res => res.json())
+  );
+  // Alerts (keep as is, uses doctor email to get doctor _id)
   const { data: alertsData, isLoading: alertsLoading } = useSWR(
     userData?.email ? `/api/doctor/alerts?doctorEmail=${encodeURIComponent(userData.email)}` : null,
     (url) => fetch(url).then(res => res.json())
   );
-  const { data: patientsData, isLoading: patientsLoading } = useSWR(
-    userData?.email ? `/api/doctor/patients?doctorEmail=${encodeURIComponent(userData.email)}` : null,
+  // Records
+  const { data: recordsData, isLoading: recordsLoading } = useSWR(
+    doctorName ? `/api/doctor/records?doctorName=${encodeURIComponent(doctorName)}` : null,
     (url) => fetch(url).then(res => res.json())
   );
   const appointments = appointmentsData?.appointments || [];
   const alerts = alertsData?.alerts || [];
   const patients = patientsData?.patients || [];
-
-  // Real-time fetch for medical records
-  const { data: recordsData, isLoading: recordsLoading } = useSWR(
-    userData?.name ? `/api/doctor/records?doctorName=${encodeURIComponent(userData.name)}` : null,
-    (url) => fetch(url).then(res => res.json())
-  );
   const records = recordsData?.records || [];
 
   if (!userData) return null;
