@@ -83,7 +83,7 @@ export default function DoctorDashboard() {
           {/* Welcome Section */}
           <div className="flex items-center justify-between">
             <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent">
-              Welcome back, {userData.name}
+              {userData.name}
             </h2>
             <div className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-blue-100">
               <Stethoscope className="h-5 w-5 text-blue-600" />
@@ -103,7 +103,7 @@ export default function DoctorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {alerts.slice(0, 3).map((alert: any, idx: number) => {
+                  {alerts.slice(0, 1).map((alert: any, idx: number) => {
                     let patientDisplay = "Patient";
                     if (alert.patient && typeof alert.patient === 'object' && alert.patient.firstName && alert.patient.lastName) {
                       patientDisplay = `${alert.patient.firstName} ${alert.patient.lastName}`;
@@ -171,7 +171,7 @@ export default function DoctorDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">8</div>
+                <div className="text-2xl font-bold">{records.length}</div>
                 <p className="text-xs text-purple-100">Medical records</p>
               </CardContent>
             </Card>
