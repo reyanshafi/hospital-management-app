@@ -77,69 +77,63 @@ export default function LoginForm() {
       title: "Patient Portal",
       description: "Access your medical records and appointments",
       color: "text-emerald-600",
-      bgGradient: "from-emerald-50 to-green-50",
-      borderColor: "border-emerald-200",
-      buttonGradient: "from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700",
-      focusColor: "focus:border-emerald-500 focus:ring-emerald-500/20",
+      bgColor: "bg-emerald-50",
+      borderColor: "border-emerald-100",
+      buttonColor: "bg-emerald-600 hover:bg-emerald-700",
+      focusColor: "focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200",
+      tabActiveColor: "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700",
     },
     doctor: {
       icon: Stethoscope,
       title: "Doctor Portal",
       description: "Manage patients and medical records",
       color: "text-blue-600",
-      bgGradient: "from-blue-50 to-indigo-50",
-      borderColor: "border-blue-200",
-      buttonGradient: "from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
-      focusColor: "focus:border-blue-500 focus:ring-blue-500/20",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-100",
+      buttonColor: "bg-blue-600 hover:bg-blue-700",
+      focusColor: "focus:border-blue-500 focus:ring-2 focus:ring-blue-200",
+      tabActiveColor: "data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700",
     },
     admin: {
       icon: Shield,
       title: "Admin Portal",
       description: "System administration and management",
       color: "text-purple-600",
-      bgGradient: "from-purple-50 to-violet-50",
-      borderColor: "border-purple-200",
-      buttonGradient: "from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700",
-      focusColor: "focus:border-purple-500 focus:ring-purple-500/20",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-100",
+      buttonColor: "bg-purple-600 hover:bg-purple-700",
+      focusColor: "focus:border-purple-500 focus:ring-2 focus:ring-purple-200",
+      tabActiveColor: "data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700",
     },
   }
 
   const currentConfig = roleConfig[activeRole as keyof typeof roleConfig];
 
   return (
-    <div className="relative">
-      {/* Animated background elements */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl blur opacity-25"></div>
-      
-      <Card className="relative shadow-2xl border-0 backdrop-blur-lg bg-white/95 rounded-2xl overflow-hidden">
-        {/* Dynamic header background */}
-        <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${currentConfig.buttonGradient}`}></div>
-        
-        <CardHeader className="space-y-2 pb-6 pt-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className={`p-3 rounded-full bg-gradient-to-br ${currentConfig.bgGradient} ${currentConfig.borderColor} border-2 transition-all duration-300`}>
-              <currentConfig.icon className={`w-6 h-6 ${currentConfig.color}`} />
+    <div className="w-full max-w-md mx-auto">
+      <Card className="shadow-xl border-0 bg-white">
+        <CardHeader className="text-center pb-8 pt-8">
+          <div className="flex justify-center mb-6">
+            <div className={`p-4 rounded-2xl ${currentConfig.bgColor} ${currentConfig.borderColor} border-2`}>
+              <currentConfig.icon className={`w-8 h-8 ${currentConfig.color}`} />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-            Welcome Back
+          <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+            Healthcare Login
           </CardTitle>
-          <CardDescription className="text-center text-gray-600 font-medium">
+          <CardDescription className="text-gray-600">
             Secure access to your healthcare portal
           </CardDescription>
         </CardHeader>
 
         <CardContent className="px-8 pb-8">
           <Tabs value={activeRole} onValueChange={setActiveRole} className="w-full">
-            {/* Enhanced Tab List */}
-            <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-gray-50 rounded-xl border">
+            <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-gray-100 rounded-lg h-12">
               {Object.entries(roleConfig).map(([role, config]) => (
                 <TabsTrigger 
                   key={role}
                   value={role} 
-                  className={`text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200 py-3 ${
-                    activeRole === role ? `${config.color} data-[state=active]:${config.color}` : ''
-                  }`}
+                  className={`text-sm font-medium rounded-md py-2 transition-all ${config.tabActiveColor}`}
                 >
                   <config.icon className="w-4 h-4 mr-2" />
                   {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -149,54 +143,51 @@ export default function LoginForm() {
 
             {Object.entries(roleConfig).map(([role, config]) => (
               <TabsContent key={role} value={role} className="space-y-6">
-                {/* Role Information Card */}
-                <div className={`p-4 rounded-xl bg-gradient-to-br ${config.bgGradient} border ${config.borderColor} text-center transition-all duration-300`}>
-                  <h3 className="font-bold text-lg text-gray-800 mb-1">{config.title}</h3>
+                <div className={`p-4 rounded-lg ${config.bgColor} ${config.borderColor} border text-center`}>
+                  <h3 className="font-semibold text-gray-900 mb-1">{config.title}</h3>
                   <p className="text-sm text-gray-700">{config.description}</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Email Input */}
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor={`email-${role}`} className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Mail className="w-4 h-4 mr-2" />
+                    <Label htmlFor={`email-${role}`} className="text-sm font-medium text-gray-700">
                       Email Address
                     </Label>
-                    <div className="relative group">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id={`email-${role}`}
                         name="email"
                         type="email"
-                        placeholder={`Enter your ${role} email address`}
+                        placeholder={`Enter your ${role} email`}
                         required
                         disabled={isLoading}
-                        className={`h-12 pl-4 pr-4 text-sm border-2 border-gray-200 rounded-xl ${config.focusColor} transition-all duration-200 group-hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        className={`pl-10 h-12 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50`}
                       />
                     </div>
                   </div>
 
-                  {/* Password Input */}
                   <div className="space-y-2">
-                    <Label htmlFor={`password-${role}`} className="text-sm font-semibold text-gray-700 flex items-center">
-                      <Lock className="w-4 h-4 mr-2" />
+                    <Label htmlFor={`password-${role}`} className="text-sm font-medium text-gray-700">
                       Password
                     </Label>
-                    <div className="relative group">
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id={`password-${role}`}
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your secure password"
+                        placeholder="Enter your password"
                         required
                         disabled={isLoading}
-                        className={`h-12 pl-4 pr-12 text-sm border-2 border-gray-200 rounded-xl ${config.focusColor} transition-all duration-200 group-hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                        className={`pl-10 pr-12 h-12 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50`}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         disabled={isLoading}
-                        className="absolute right-1 top-1 h-10 w-10 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 hover:bg-gray-100 rounded-md"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -208,30 +199,27 @@ export default function LoginForm() {
                     </div>
                   </div>
 
-                  {/* Success Alert */}
                   {success && (
-                    <Alert className="rounded-xl border-green-200 bg-green-50">
+                    <Alert className="rounded-lg border-green-200 bg-green-50">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      <AlertDescription className="text-sm font-medium text-green-700">
+                      <AlertDescription className="text-sm text-green-800">
                         {success}
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  {/* Error Alert */}
                   {error && (
-                    <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50">
+                    <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
                       <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="text-sm font-medium">
+                      <AlertDescription className="text-sm">
                         {error}
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  {/* Submit Button */}
                   <Button 
                     type="submit" 
-                    className={`w-full h-12 text-sm font-semibold rounded-xl bg-gradient-to-r ${config.buttonGradient} border-0 shadow-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-xl disabled:hover:scale-100 disabled:opacity-60`}
+                    className={`w-full h-12 text-white font-medium rounded-lg ${config.buttonColor} shadow-md hover:shadow-lg transition-all disabled:opacity-50`}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -256,23 +244,11 @@ export default function LoginForm() {
             ))}
           </Tabs>
 
-          {/* Footer Section */}
-          <div className="mt-8 space-y-4">
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-4 text-gray-500 font-medium">Need assistance?</span>
-              </div>
-            </div>
-
-            {/* Support Links */}
+          <div className="mt-8 pt-6 border-t border-gray-100">
             <div className="text-center space-y-3">
               <button 
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors duration-200 disabled:opacity-50"
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors disabled:opacity-50"
                 disabled={isLoading}
               >
                 Forgot your password?
@@ -280,22 +256,22 @@ export default function LoginForm() {
               
               <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
                 <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>Secure Connection</span>
                 </div>
                 <span>•</span>
-                <span>24/7 IT Support Available</span>
+                <span>24/7 Support Available</span>
               </div>
               
-              <div className="text-xs text-gray-400">
-                Having trouble? Email us at{" "}
+              <p className="text-xs text-gray-400">
+                Need help?{" "}
                 <a 
                   href="mailto:support@medicare.com" 
-                  className="text-blue-600 hover:underline transition-colors"
+                  className="text-blue-600 hover:underline"
                 >
                   support@medicare.com
                 </a>
-              </div>
+              </p>
             </div>
           </div>
         </CardContent>
