@@ -112,49 +112,49 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto">
       <Card className="shadow-xl border-0 bg-white">
-        <CardHeader className="text-center pb-8 pt-8">
-          <div className="flex justify-center mb-6">
-            <div className={`p-4 rounded-2xl ${currentConfig.bgColor} ${currentConfig.borderColor} border-2`}>
-              <currentConfig.icon className={`w-8 h-8 ${currentConfig.color}`} />
+        <CardHeader className="text-center pb-4 pt-4">
+          <div className="flex justify-center mb-4">
+            <div className={`p-3 rounded-2xl ${currentConfig.bgColor} ${currentConfig.borderColor} border-2`}>
+              <currentConfig.icon className={`w-7 h-7 ${currentConfig.color}`} />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
-            Healthcare Login
+          <CardTitle className="text-xl font-bold text-gray-900 mb-1">
+            Medicare Login
           </CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-gray-600 text-sm">
             Secure access to your healthcare portal
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="px-8 pb-8">
+        <CardContent className="px-6 pb-6">
           <Tabs value={activeRole} onValueChange={setActiveRole} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-gray-100 rounded-lg h-12">
+            <TabsList className="grid w-full grid-cols-3 mb-4 p-1 bg-gray-100 rounded-lg h-10">
               {Object.entries(roleConfig).map(([role, config]) => (
                 <TabsTrigger 
                   key={role}
                   value={role} 
-                  className={`text-sm font-medium rounded-md py-2 transition-all ${config.tabActiveColor}`}
+                  className={`text-xs font-medium rounded-md py-1 transition-all ${config.tabActiveColor}`}
                 >
-                  <config.icon className="w-4 h-4 mr-2" />
+                  <config.icon className="w-4 h-4 mr-1" />
                   {role.charAt(0).toUpperCase() + role.slice(1)}
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {Object.entries(roleConfig).map(([role, config]) => (
-              <TabsContent key={role} value={role} className="space-y-6">
-                <div className={`p-4 rounded-lg ${config.bgColor} ${config.borderColor} border text-center`}>
-                  <h3 className="font-semibold text-gray-900 mb-1">{config.title}</h3>
-                  <p className="text-sm text-gray-700">{config.description}</p>
+              <TabsContent key={role} value={role} className="space-y-3">
+                <div className={`p-2 rounded-lg ${config.bgColor} ${config.borderColor} border text-center text-xs`}> {/* smaller padding and text */}
+                  <h3 className="font-semibold text-gray-900 mb-0.5 text-base">{config.title}</h3>
+                  <p className="text-xs text-gray-700">{config.description}</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor={`email-${role}`} className="text-sm font-medium text-gray-700">
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor={`email-${role}`} className="text-xs font-medium text-gray-700">
                       Email Address
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input
                         id={`email-${role}`}
                         name="email"
@@ -162,17 +162,17 @@ export default function LoginForm() {
                         placeholder={`Enter your ${role} email`}
                         required
                         disabled={isLoading}
-                        className={`pl-10 h-12 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50`}
+                        className={`pl-9 h-10 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50 text-sm`}
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor={`password-${role}`} className="text-sm font-medium text-gray-700">
+                  <div className="space-y-1">
+                    <Label htmlFor={`password-${role}`} className="text-xs font-medium text-gray-700">
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input
                         id={`password-${role}`}
                         name="password"
@@ -180,14 +180,14 @@ export default function LoginForm() {
                         placeholder="Enter your password"
                         required
                         disabled={isLoading}
-                        className={`pl-10 pr-12 h-12 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50`}
+                        className={`pl-9 pr-10 h-10 border-gray-300 rounded-lg ${config.focusColor} disabled:opacity-50 text-sm`}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         disabled={isLoading}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 hover:bg-gray-100 rounded-md"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-7 h-7 hover:bg-gray-100 rounded-md"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -200,18 +200,18 @@ export default function LoginForm() {
                   </div>
 
                   {success && (
-                    <Alert className="rounded-lg border-green-200 bg-green-50">
+                    <Alert className="rounded-lg border-green-200 bg-green-50 py-2 text-xs">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      <AlertDescription className="text-sm text-green-800">
+                      <AlertDescription className="text-xs text-green-800">
                         {success}
                       </AlertDescription>
                     </Alert>
                   )}
 
                   {error && (
-                    <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
+                    <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50 py-2 text-xs">
                       <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="text-sm">
+                      <AlertDescription className="text-xs">
                         {error}
                       </AlertDescription>
                     </Alert>
@@ -219,7 +219,7 @@ export default function LoginForm() {
 
                   <Button 
                     type="submit" 
-                    className={`w-full h-12 text-white font-medium rounded-lg ${config.buttonColor} shadow-md hover:shadow-lg transition-all disabled:opacity-50`}
+                    className={`w-full h-10 text-white font-medium rounded-lg ${config.buttonColor} shadow-md hover:shadow-lg transition-all disabled:opacity-50 text-sm`}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -244,16 +244,15 @@ export default function LoginForm() {
             ))}
           </Tabs>
 
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="text-center space-y-3">
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="text-center space-y-2">
               <button 
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors disabled:opacity-50"
+                className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors disabled:opacity-50"
                 disabled={isLoading}
               >
                 Forgot your password?
               </button>
-              
               <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -262,7 +261,6 @@ export default function LoginForm() {
                 <span>•</span>
                 <span>24/7 Support Available</span>
               </div>
-              
               <p className="text-xs text-gray-400">
                 Need help?{" "}
                 <a 

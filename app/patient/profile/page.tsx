@@ -263,6 +263,16 @@ export default function PatientProfile() {
                         className={isEditing ? "border-purple-300 focus:border-purple-500" : ""}
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="assignedDoctor">Assigned Doctor</Label>
+                      <Input
+                        id="assignedDoctor"
+                        value={profileData.doctor || 'Not assigned'}
+                        disabled
+                        className="bg-gray-100 text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">

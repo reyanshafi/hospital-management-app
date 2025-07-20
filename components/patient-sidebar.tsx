@@ -54,11 +54,7 @@ const patientNavItems = [
     url: "/patient/profile",
     icon: User,
   },
-  {
-    title: "Settings",
-    url: "/patient/settings",
-    icon: Settings,
-  },
+  
 ]
 
 export function PatientSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

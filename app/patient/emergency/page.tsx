@@ -49,8 +49,8 @@ export default function PatientEmergency() {
   const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
+  // Remove all audio/voice state and handlers except the button
+  // Remove stopRecording, startRecording, audioTranscript, audioUrl, showTranscript, handleSendAudioAlert, and related UI
 
   // Get user location on component mount
   useEffect(() => {
@@ -126,58 +126,7 @@ export default function PatientEmergency() {
     }
   }
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      audioChunksRef.current = []
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
-      }
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
-        
-        // Simulate audio processing
-        const simulatedTranscript = "I'm having trouble breathing and chest pain"
-        const isCriticalAlert = checkForCriticalKeywords(simulatedTranscript)
-
-        setIsCritical(isCriticalAlert)
-        setAlertSent(true)
-
-        const newAlert = {
-          id: Date.now(),
-          type: "Audio",
-          message: "Voice message: " + simulatedTranscript.substring(0, 40) + "...",
-          time: "Just now",
-          status: isCriticalAlert ? "Critical - Doctor Notified" : "Sent",
-          severity: isCriticalAlert ? "High" : "Medium"
-        }
-
-        setRecentAlerts((prev) => [newAlert, ...prev])
-
-        setTimeout(() => {
-          setAlertSent(false)
-          setIsCritical(false)
-        }, 5000)
-      }
-
-      mediaRecorder.start()
-      setIsRecording(true)
-    } catch (error) {
-      console.error("Error accessing microphone:", error)
-    }
-  }
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop())
-      setIsRecording(false)
-    }
-  }
+  // Remove stopRecording, startRecording, audioTranscript, audioUrl, showTranscript, handleSendAudioAlert, and related UI
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -287,32 +236,17 @@ export default function PatientEmergency() {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h3 className="text-sm font-medium text-gray-700">Voice Message</h3>
-                        <p className="text-xs text-gray-500">Record an audio description of your emergency</p>
+                        <p className="text-xs text-gray-500">Voice alerts coming soon</p>
                       </div>
                       <Button
-                        variant={isRecording ? "destructive" : "outline"}
-                        onClick={isRecording ? stopRecording : startRecording}
-                        className={isRecording ? "animate-pulse" : ""}
+                        variant="outline"
+                        onClick={() => {}}
+                        disabled
                       >
-                        {isRecording ? (
-                          <>
-                            <MicOff className="h-4 w-4 mr-2" />
-                            Stop Recording
-                          </>
-                        ) : (
-                          <>
-                            <Mic className="h-4 w-4 mr-2" />
-                            Start Recording
-                          </>
-                        )}
+                        <Mic className="h-4 w-4 mr-2" />
+                        Start Recording
                       </Button>
                     </div>
-                    {isRecording && (
-                      <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                        <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium">Recording... Speak clearly about your emergency</span>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>

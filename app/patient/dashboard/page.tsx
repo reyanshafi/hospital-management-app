@@ -11,6 +11,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Calendar, TestTube, Pill, AlertTriangle, Clock, Heart, Phone, Loader2, Stethoscope, Syringe, Activity, ClipboardList } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function PatientDashboard() {
   const router = useRouter()
@@ -28,6 +30,12 @@ export default function PatientDashboard() {
   const [results, setResults] = useState<Result[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
+  const [assignedDoctor, setAssignedDoctor] = useState<string | null>(null);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [rescheduleApptId, setRescheduleApptId] = useState<string | null>(null);
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
 
   const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
@@ -59,6 +67,10 @@ export default function PatientDashboard() {
         setIsAuthorized(true);
         const patientId = user.user._id;
         fetchPatientData(patientId);
+        // Fetch assigned doctor
+        fetch(`/api/patient/profile?patientId=${patientId}`)
+          .then(res => res.json())
+          .then(data => setAssignedDoctor(data.doctor || null));
 
       } catch (error) {
         console.error('Error parsing session:', error);
@@ -154,6 +166,26 @@ export default function PatientDashboard() {
   const pendingResults = results.filter(r => r.status === 'pending');
   const urgentResults = results.filter(r => r.status === 'urgent');
 
+  const handleOpenReschedule = (apptId: string) => {
+    setRescheduleApptId(apptId);
+    setRescheduleOpen(true);
+  };
+  const handleReschedule = async () => {
+    if (!rescheduleApptId || !rescheduleDate || !rescheduleTime) return;
+    setRescheduleLoading(true);
+    await fetch("/api/patient/appointments/reschedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appointmentId: rescheduleApptId, newDate: rescheduleDate, newTime: rescheduleTime })
+    });
+    setRescheduleLoading(false);
+    setRescheduleOpen(false);
+    setRescheduleDate("");
+    setRescheduleTime("");
+    setRescheduleApptId(null);
+    // Optionally refetch appointments
+  };
+
   return (
     <SidebarProvider>
       <PatientSidebar />
@@ -181,6 +213,12 @@ export default function PatientDashboard() {
                 {userData.user.name}
               </h2>
               <p className="text-muted-foreground mt-1">Here's your health summary for today</p>
+              {assignedDoctor && (
+                <div className="mt-2 flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4 text-blue-600" />
+                  <span className="text-blue-800 font-medium">Assigned Doctor: {assignedDoctor}</span>
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
@@ -455,10 +493,12 @@ export default function PatientDashboard() {
                       <span>{appointment.time}</span>
                     </div>
                     <div className="flex gap-2 mt-2">
-                      <Button variant="outline" size="sm" className="rounded-lg flex-1 border-blue-200 text-blue-700 font-semibold hover:bg-blue-50/60">
-                        <Phone className="h-3 w-3 mr-1" /> Call
+                      <Button asChild variant="outline" size="sm" className="rounded-lg flex-1 border-blue-200 text-blue-700 font-semibold hover:bg-blue-50/60">
+                        <a href="tel:9006512509">
+                          <Phone className="h-3 w-3 mr-1" /> Call
+                        </a>
                       </Button>
-                      <Button variant="outline" size="sm" className="rounded-lg flex-1 border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50/60">
+                      <Button variant="outline" size="sm" className="rounded-lg flex-1 border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50/60" onClick={() => handleOpenReschedule(appointment._id)}>
                         Reschedule
                       </Button>
                     </div>
@@ -564,6 +604,22 @@ export default function PatientDashboard() {
           </div>
         </div>
       </SidebarInset>
+      <Dialog open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reschedule Appointment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input type="date" value={rescheduleDate} onChange={e => setRescheduleDate(e.target.value)} />
+            <Input type="time" value={rescheduleTime} onChange={e => setRescheduleTime(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleReschedule} disabled={rescheduleLoading || !rescheduleDate || !rescheduleTime} className="bg-indigo-600 hover:bg-indigo-700">
+              {rescheduleLoading ? "Sending..." : "Submit for Approval"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   )
 }
