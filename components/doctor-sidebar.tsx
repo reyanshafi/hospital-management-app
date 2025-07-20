@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation";
 
 const doctorNavItems = [
   {
@@ -51,14 +52,11 @@ const doctorNavItems = [
     url: "/doctor/alerts",
     icon: Bell,
   },
-  {
-    title: "Settings",
-    url: "/doctor/settings",
-    icon: Settings,
-  },
+  
 ]
 
 export function DoctorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
   return (
     <Sidebar {...props} className="bg-gradient-to-b from-slate-50 to-blue-50/30 border-r border-slate-200/60">
       <SidebarHeader className="border-b border-slate-200/60 bg-gradient-to-r from-blue-50 to-indigo-50/80">
@@ -80,28 +78,31 @@ export function DoctorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-3 space-y-1">
-              {doctorNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    className="group relative rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm transition-all duration-300 border border-transparent hover:border-blue-200/50"
-                  >
-                    <a href={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                      <div className="p-2 rounded-lg bg-white/80 group-hover:bg-blue-100 group-hover:shadow-sm transition-all duration-300 border border-slate-200/50 group-hover:border-blue-200">
-                        <item.icon className="h-4 w-4 text-slate-600 group-hover:text-blue-600 transition-colors duration-300" />
-                      </div>
-                      <span className="font-medium text-slate-700 group-hover:text-slate-800 transition-colors duration-300">
-                        {item.title}
-                      </span>
-                      {item.title === "Emergency Alerts" && (
-                        <div className="ml-auto">
-                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              {doctorNavItems.map((item) => {
+                const isActive = pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      className={`group relative rounded-xl transition-all duration-300 border border-transparent ${isActive ? 'bg-purple-700 shadow-md border-purple-800' : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm hover:border-blue-200/50'}`}
+                    >
+                      <a href={item.url} className="flex items-center gap-3 px-3 py-2.5">
+                        <div className={`p-2 rounded-lg bg-white/80 border border-slate-200/50 group-hover:bg-blue-100 group-hover:shadow-sm transition-all duration-300 group-hover:border-blue-200 ${isActive ? 'bg-purple-800 border-purple-900' : ''}`}> 
+                          <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-600 group-hover:text-blue-600'} transition-colors duration-300`} />
                         </div>
-                      )}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                        <span className={`font-medium transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-700 group-hover:text-slate-800'}`}>
+                          {item.title}
+                        </span>
+                        {item.title === "Emergency Alerts" && (
+                          <div className="ml-auto">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                          </div>
+                        )}
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

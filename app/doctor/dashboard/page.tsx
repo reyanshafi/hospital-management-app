@@ -103,7 +103,7 @@ export default function DoctorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {alerts.map((alert: any, idx: number) => {
+                  {alerts.slice(0, 3).map((alert: any, idx: number) => {
                     let patientDisplay = "Patient";
                     if (alert.patient && typeof alert.patient === 'object' && alert.patient.firstName && alert.patient.lastName) {
                       patientDisplay = `${alert.patient.firstName} ${alert.patient.lastName}`;
@@ -128,6 +128,11 @@ export default function DoctorDashboard() {
                       </div>
                     );
                   })}
+                </div>
+                <div className="flex justify-end mt-2">
+                  <Button size="sm" variant="link" className="text-purple-700 font-semibold" asChild>
+                    <a href="/doctor/alerts">View All</a>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

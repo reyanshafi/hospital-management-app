@@ -67,11 +67,7 @@ const adminNavItems = [
     url: "/admin/alerts",
     icon: Bell,
   },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
+  
 ]
 
 export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
