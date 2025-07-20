@@ -16,88 +16,87 @@ import {
 } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation";
 
-const doctorNavItems = [
-  {
-    title: "Dashboard",
-    url: "/doctor/dashboard",
-    icon: Activity,
-  },
-  {
-    title: "Appointments",
-    url: "/doctor/appointments",
-    icon: Calendar,
-  },
-  {
-    title: "My Patients",
-    url: "/doctor/patients",
-    icon: Users,
-  },
-  {
-    title: "Medical Records",
-    url: "/doctor/records",
-    icon: FileText,
-  },
-  {
-    title: "Prescriptions",
-    url: "/doctor/prescriptions",
-    icon: Pill,
-  },
-  {
-    title: "Test Results",
-    url: "/doctor/results",
-    icon: TestTube,
-  },
-  {
-    title: "Emergency Alerts",
-    url: "/doctor/alerts",
-    icon: Bell,
-  },
-  
-]
-
-export function DoctorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function DoctorSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const doctorNavItems = [
+    {
+      title: "Dashboard",
+      url: "/doctor/dashboard",
+      icon: Activity,
+    },
+    {
+      title: "Appointments",
+      url: "/doctor/appointments",
+      icon: Calendar,
+    },
+    {
+      title: "My Patients",
+      url: "/doctor/patients",
+      icon: Users,
+    },
+    {
+      title: "Medical Records",
+      url: "/doctor/records",
+      icon: FileText,
+    },
+    {
+      title: "Prescriptions",
+      url: "/doctor/prescriptions",
+      icon: Pill,
+    },
+    {
+      title: "Test Results",
+      url: "/doctor/results",
+      icon: TestTube,
+    },
+    {
+      title: "Emergency Alerts",
+      url: "/doctor/alerts",
+      icon: Bell,
+    },
+  ];
+  const handleSignOut = () => {
+    document.cookie = 'session=; Max-Age=0; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    window.location.href = '/';
+  };
   return (
-    <Sidebar {...props} className="bg-gradient-to-b from-slate-50 to-blue-50/30 border-r border-slate-200/60">
-      <SidebarHeader className="border-b border-slate-200/60 bg-gradient-to-r from-blue-50 to-indigo-50/80">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-            <Stethoscope className="h-6 w-6 text-white" />
+    <Sidebar className="border-r" {...props}>
+      <SidebarHeader className="border-b bg-white p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-600">
+            <Stethoscope className="h-5 w-5 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold bg-gradient-to-r from-slate-800 to-blue-700 bg-clip-text text-transparent">Doctor Portal</p>
-            <p className="text-xs text-slate-600 font-medium">MediCare System</p>
+            <p className="text-sm font-semibold text-gray-900">Doctor Portal</p>
+            <p className="text-xs text-gray-500">MediCare System</p>
           </div>
         </div>
       </SidebarHeader>
-      
-      <SidebarContent className="py-4">
+      <SidebarContent className="px-4 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase mb-3">
             Medical Practice
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="px-3 space-y-1">
+            <SidebarMenu className="space-y-1">
               {doctorNavItems.map((item) => {
                 const isActive = pathname === item.url;
+                const isEmergency = item.title.toLowerCase().includes("emergency");
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
-                      className={`group relative rounded-xl transition-all duration-300 border border-transparent ${isActive ? 'bg-purple-700 shadow-md border-purple-800' : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm hover:border-blue-200/50'}`}
+                    <SidebarMenuButton
+                      asChild
+                      className={`h-10 rounded-lg transition-colors duration-200 ${
+                        isActive
+                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                          : isEmergency
+                            ? 'hover:bg-red-50 text-red-600 hover:text-red-700'
+                            : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                     >
-                      <a href={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                        <div className={`p-2 rounded-lg bg-white/80 border border-slate-200/50 group-hover:bg-blue-100 group-hover:shadow-sm transition-all duration-300 group-hover:border-blue-200 ${isActive ? 'bg-purple-800 border-purple-900' : ''}`}> 
-                          <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-600 group-hover:text-blue-600'} transition-colors duration-300`} />
-                        </div>
-                        <span className={`font-medium transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-700 group-hover:text-slate-800'}`}>
-                          {item.title}
-                        </span>
-                        {item.title === "Emergency Alerts" && (
-                          <div className="ml-auto">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                          </div>
-                        )}
+                      <a href={item.url} className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4" />
+                        <span className="text-sm font-medium">{item.title}</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -107,30 +106,20 @@ export function DoctorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
-      <SidebarFooter className="border-t border-slate-200/60 bg-gradient-to-r from-slate-50 to-blue-50/50 p-3">
+      <SidebarFooter className="border-t p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => {
-                document.cookie = 'session=; Max-Age=0; path=/';
-                window.location.href = '/';
-              }}
-              className="group w-full rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 hover:shadow-sm transition-all duration-300 border border-transparent hover:border-red-200/50"
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              className="h-10 w-full rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors duration-200"
             >
-              <div className="flex items-center gap-3 px-3 py-2.5 w-full">
-                <div className="p-2 rounded-lg bg-white/80 group-hover:bg-red-100 group-hover:shadow-sm transition-all duration-300 border border-slate-200/50 group-hover:border-red-200">
-                  <LogOut className="h-4 w-4 text-slate-600 group-hover:text-red-600 transition-colors duration-300" />
-                </div>
-                <span className="font-medium text-slate-700 group-hover:text-red-700 transition-colors duration-300">
-                  Sign Out
-                </span>
-              </div>
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm font-medium">Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

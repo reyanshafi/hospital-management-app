@@ -16,6 +16,8 @@ export default function AdminDashboard() {
   const { data: recentPatients, error: patientsError, isLoading: patientsLoading } = useSWR("/api/admin/recent-patients", fetcher, { refreshInterval: 5000 });
   // Real-time recent emergency alerts
   const { data: recentAlerts, error: alertsError, isLoading: alertsLoading } = useSWR("/api/admin/recent-alerts", fetcher, { refreshInterval: 5000 });
+  // Real-time AI patient monitoring
+  const { data: aiMonitoring, error: aiError, isLoading: aiLoading } = useSWR("/api/admin/ai-monitoring", fetcher, { refreshInterval: 5000 });
 
   return (
     <SidebarProvider>
@@ -236,6 +238,66 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* AI Patient Monitoring Section */}
+          <Card className="mt-8 bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="pb-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-lg">
+              <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+                  <Stethoscope className="h-5 w-5 text-white" />
+                </div>
+                AI Patient Monitoring
+                <div className="ml-auto flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-full">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-medium text-blue-700">Live</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 max-h-96 overflow-y-auto">
+              {aiLoading ? (
+                <div className="flex items-center justify-center py-12 text-slate-600">
+                  <Loader2 className="h-6 w-6 animate-spin mr-3" />
+                  <span className="font-medium">Loading monitoring data...</span>
+                </div>
+              ) : aiError ? (
+                <div className="text-red-600 text-center py-12 font-medium">Failed to load monitoring data.</div>
+              ) : (
+                <div>
+                  {(!aiMonitoring?.monitoring || aiMonitoring.monitoring.length === 0) && (
+                    <div className="text-slate-400 text-center py-12 font-medium">No monitoring data.</div>
+                  )}
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Heart Rate</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SpO2</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Temp (°C)</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {aiMonitoring?.monitoring?.map((m: any, idx: number) => (
+                        <tr key={m._id || idx} className="hover:bg-blue-50">
+                          <td className="px-4 py-2 font-semibold">{m.patientName}</td>
+                          <td className="px-4 py-2">{m.heartRate}</td>
+                          <td className="px-4 py-2">{m.spo2}</td>
+                          <td className="px-4 py-2">{m.temperature}</td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold 
+                              ${m.status === 'critical' ? 'bg-red-100 text-red-700' : 
+                                m.status === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-700'}`}>{m.status}</span>
+                          </td>
+                          <td className="px-4 py-2 text-xs text-gray-500">{m.timestamp ? new Date(m.timestamp).toLocaleString() : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </SidebarInset>
     </SidebarProvider>

@@ -6,7 +6,7 @@ export async function GET() {
   // @ts-ignore
   const Patient = require("@/models/Patient");
   // @ts-ignore
-  const User = require("@/models/User");
+  const Doctor = require("@/models/Doctor");
   // @ts-ignore
   const Bed = require("@/models/Bed");
   // @ts-ignore
@@ -14,7 +14,7 @@ export async function GET() {
   try {
     const [patients, doctors, beds, alerts] = await Promise.all([
       Patient.countDocuments({}),
-      User.countDocuments({ role: "doctor" }),
+      Doctor.countDocuments({}),
       Bed.countDocuments({ available: true }),
       Alert.countDocuments({ active: true }),
     ]);
