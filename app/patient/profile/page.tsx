@@ -18,24 +18,14 @@ import { User, Phone, Mail, MapPin, Calendar, Heart, Edit, Save, Camera, Shield,
 export default function PatientProfile() {
   const [userData, setUserData] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phone: "(555) 123-4567",
-    dateOfBirth: "1985-06-15",
-    address: "123 Main St, Anytown, USA 12345",
-    emergencyContact: "Jane Doe - (555) 987-6543",
-    bloodType: "O+",
-    allergies: "Penicillin, Shellfish",
-    medicalConditions: "Hypertension, Type 2 Diabetes",
-    insuranceProvider: "Blue Cross Blue Shield",
-    insuranceNumber: "BCBS123456789",
-    preferredPharmacy: "CVS Pharmacy - Main Street"
-  })
+  const [profileData, setProfileData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [oldPassword, setOldPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
 
   useEffect(() => {
-    // Get user data from session cookie
     try {
       const session = document.cookie.split('; ').find(row => row.startsWith('session='))?.split('=')[1]
       if (session) {
@@ -47,20 +37,77 @@ export default function PatientProfile() {
     }
   }, [])
 
-  const handleSave = () => {
-    setIsEditing(false)
-    // Here you would typically save to your backend
-    console.log('Saving profile data:', profileData)
+  // Replace polling useEffect with a single fetch on mount or when userData changes
+  useEffect(() => {
+    if (!userData?._id) return
+    let isMounted = true
+    const fetchProfile = async () => {
+      setLoading(true)
+      setError("")
+      try {
+        const res = await fetch(`/api/patient/profile?patientId=${userData._id}`)
+        const data = await res.json()
+        if (isMounted) setProfileData(data)
+      } catch (err: any) {
+        if (isMounted) setError("Failed to fetch profile data")
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+    fetchProfile()
+    return () => { isMounted = false }
+  }, [userData])
+
+  // On save or cancel, refetch profile data
+  const handleSave = async () => {
+    setError(""); setSuccess("")
+    if (!profileData) return
+    try {
+      const res = await fetch("/api/patient/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: userData._id,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          phone: profileData.phone,
+          email: profileData.email,
+          oldPassword: newPassword ? oldPassword : undefined,
+          newPassword: newPassword || undefined
+        })
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || "Failed to update profile")
+      setSuccess("Profile updated successfully")
+      setIsEditing(false)
+      setOldPassword("")
+      setNewPassword("")
+      // Refetch profile data after save
+      const refetch = await fetch(`/api/patient/profile?patientId=${userData._id}`)
+      setProfileData(await refetch.json())
+    } catch (err: any) {
+      setError(err.message || "Failed to update profile")
+    }
   }
 
   const handleCancel = () => {
     setIsEditing(false)
-    // Reset any changes
+    setOldPassword("")
+    setNewPassword("")
+    // Refetch profile data after cancel
+    if (userData?._id) {
+      fetch(`/api/patient/profile?patientId=${userData._id}`)
+        .then(res => res.json())
+        .then(data => setProfileData(data))
+    }
   }
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase()
   }
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-blue-600">Loading...</div>
+  if (!profileData) return null
 
   return (
     <SidebarProvider>
@@ -337,49 +384,36 @@ export default function PatientProfile() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5 text-green-500" />
+                    <Shield className="h-5 w-5 text-blue-600" />
                     <span>Security & Privacy</span>
                   </CardTitle>
-                  <CardDescription>Manage your account security settings</CardDescription>
+                  <CardDescription>Change your password and manage privacy settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Password</h3>
-                        <p className="text-sm text-gray-600">Last changed 3 months ago</p>
-                      </div>
-                      <Button variant="outline">Change Password</Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Two-Factor Authentication</h3>
-                        <p className="text-sm text-gray-600">Add an extra layer of security</p>
-                      </div>
-                      <Button variant="outline">Enable 2FA</Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">Privacy Settings</h3>
-                        <p className="text-sm text-gray-600">Control who can see your information</p>
-                      </div>
-                      <Button variant="outline">Manage Privacy</Button>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="oldPassword">Old Password</Label>
+                    <Input
+                      id="oldPassword"
+                      type="password"
+                      value={oldPassword}
+                      onChange={e => setOldPassword(e.target.value)}
+                      disabled={!isEditing}
+                      className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
+                    />
                   </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-start space-x-2">
-                      <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                      <div>
-                        <h3 className="font-medium text-yellow-800">Data Security</h3>
-                        <p className="text-sm text-yellow-700 mt-1">
-                          Your medical data is encrypted and protected. We comply with HIPAA regulations to ensure your privacy.
-                        </p>
-                      </div>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      disabled={!isEditing}
+                      className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
+                    />
                   </div>
+                  {error && <div className="text-red-600 text-sm">{error}</div>}
+                  {success && <div className="text-green-600 text-sm">{success}</div>}
                 </CardContent>
               </Card>
             </TabsContent>

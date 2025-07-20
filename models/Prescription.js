@@ -6,6 +6,7 @@ const PrescriptionSchema = new mongoose.Schema({
   doctor: { type: String, required: true },
   refills: { type: Number, required: true },
   expires: { type: String, required: true },
+  status: { type: String, enum: ["active", "refill-needed", "expired"], default: "active" },
 });
 
 module.exports = mongoose.models.Prescription || mongoose.model("Prescription", PrescriptionSchema);

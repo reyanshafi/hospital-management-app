@@ -2,9 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import LoginForm from "@/components/login-form"
 
+type Particle = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+};
+
 // Floating particles component
 const FloatingParticles = () => {
-  const [particles, setParticles] = useState([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
     const newParticles = Array.from({ length: 15 }, (_, i) => ({

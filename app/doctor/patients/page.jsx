@@ -8,10 +8,17 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Users, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function DoctorPatients() {
   const [userData, setUserData] = useState(null);
   const router = useRouter();
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileData, setProfileData] = useState(null);
+
   useEffect(() => {
     // Get user data from session cookie
     try {
@@ -28,10 +35,25 @@ export default function DoctorPatients() {
   // Real-time fetch of patients for this doctor
   const { data, error, isLoading } = useSWR(
     userData?.name ? `/api/doctor/patients?doctorName=${encodeURIComponent(userData.name)}` : null,
-    (url) => fetch(url).then(res => res.json()),
-    { refreshInterval: 2000 }
+    (url) => fetch(url).then(res => res.json())
   );
   const patients = data?.patients || [];
+
+  const handleViewProfile = async (patientId) => {
+    setProfileModalOpen(true);
+    setProfileLoading(true);
+    setProfileError("");
+    try {
+      const res = await fetch(`/api/patient/profile?patientId=${patientId}`);
+      const data = await res.json();
+      setProfileData(data);
+    } catch (err) {
+      setProfileError("Failed to fetch profile");
+      setProfileData(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -71,6 +93,9 @@ export default function DoctorPatients() {
                           <span>{patient.phone}</span>
                         </div>
                         <Badge variant={patient.status === "Admitted" ? "default" : "secondary"}>{patient.status}</Badge>
+                        <Button variant="outline" size="sm" onClick={() => handleViewProfile(patient._id)}>
+                          View Profile
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -80,6 +105,37 @@ export default function DoctorPatients() {
           </Card>
         </div>
       </SidebarInset>
+      <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>Patient Profile</DialogTitle>
+            <DialogDescription>Full details for this patient</DialogDescription>
+          </DialogHeader>
+          {profileLoading ? (
+            <div className="text-blue-600">Loading...</div>
+          ) : profileError ? (
+            <div className="text-red-600">{profileError}</div>
+          ) : profileData ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-lg">{profileData.firstName} {profileData.lastName}</span>
+                <Badge variant="outline" className="ml-2">{profileData.status}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="font-semibold">Age:</span> {profileData.age}</div>
+                <div><span className="font-semibold">Gender:</span> {profileData.gender}</div>
+                <div><span className="font-semibold">Phone:</span> {profileData.phone}</div>
+                <div><span className="font-semibold">Email:</span> {profileData.email}</div>
+                <div><span className="font-semibold">Doctor:</span> {profileData.doctor}</div>
+                <div><span className="font-semibold">Bed:</span> {profileData.bed}</div>
+              </div>
+            </div>
+          ) : null}
+          <DialogClose asChild>
+            <Button variant="outline" className="mt-4 w-full">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }

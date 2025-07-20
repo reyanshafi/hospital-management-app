@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { UserPlus, Search, Edit, Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 
 
 
@@ -30,8 +31,8 @@ function useAvailableBeds() {
       }
     };
     fetchBeds();
-    const interval = setInterval(fetchBeds, 5000);
-    return () => { cancelled = true; clearInterval(interval); };
+    // Remove polling, only fetch on mount
+    return () => { cancelled = true; };
   }, []);
   return beds;
 }
@@ -52,8 +53,8 @@ function useDoctors() {
       }
     };
     fetchDoctors();
-    const interval = setInterval(fetchDoctors, 5000);
-    return () => { cancelled = true; clearInterval(interval); };
+    // Remove polling, only fetch on mount
+    return () => { cancelled = true; };
   }, []);
   return doctors;
 }
@@ -79,8 +80,7 @@ export default function AdminPatients() {
   };
   React.useEffect(() => {
     fetchPatients();
-    const interval = setInterval(fetchPatients, 5000);
-    return () => clearInterval(interval);
+    // Remove polling, only fetch on mount
   }, []);
   const availableBeds = useAvailableBeds();
   const doctors = useDoctors();
@@ -99,6 +99,17 @@ export default function AdminPatients() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
+  const [profileModalOpen, setProfileModalOpen] = React.useState(false);
+  const [profileLoading, setProfileLoading] = React.useState(false);
+  const [profileError, setProfileError] = React.useState("");
+  const [profileData, setProfileData] = React.useState<any>(null);
+  const [editModalOpen, setEditModalOpen] = React.useState(false);
+  const [editPatient, setEditPatient] = React.useState<any>(null);
+  const [editLoading, setEditLoading] = React.useState(false);
+  const [editError, setEditError] = React.useState("");
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -143,7 +154,63 @@ export default function AdminPatients() {
     }
   };
 
-  // ...existing code...
+  const handleViewProfile = async (patientId: string) => {
+    setProfileModalOpen(true);
+    setProfileLoading(true);
+    setProfileError("");
+    try {
+      const res = await fetch(`/api/patient/profile?patientId=${patientId}`);
+      const data = await res.json();
+      setProfileData(data);
+    } catch (err) {
+      setProfileError("Failed to fetch profile");
+      setProfileData(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleEdit = (patient: any) => {
+    setEditPatient(patient);
+    setEditModalOpen(true);
+    setEditError("");
+  };
+  const handleEditSave = async () => {
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const res = await fetch("/api/admin/patients", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editPatient._id, ...editPatient }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to update patient");
+      setEditModalOpen(false);
+      fetchPatients();
+    } catch (err: any) {
+      setEditError(err.message || "Failed to update patient");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+  const handleDelete = async (id: string) => {
+    setDeleteId(id);
+    setDeleteLoading(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/patients?id=${id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to delete patient");
+      setDeleteId(null);
+      fetchPatients();
+    } catch (err: any) {
+      setDeleteError(err.message || "Failed to delete patient");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -336,10 +403,13 @@ export default function AdminPatients() {
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleViewProfile(patient._id)}>
+                              View Profile
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(patient)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleDelete(patient._id)} disabled={deleteLoading && deleteId === patient._id}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -353,6 +423,90 @@ export default function AdminPatients() {
           </Card>
         </div>
       </SidebarInset>
+      <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>Patient Profile</DialogTitle>
+            <DialogDescription>Full details for this patient</DialogDescription>
+          </DialogHeader>
+          {profileLoading ? (
+            <div className="text-blue-600">Loading...</div>
+          ) : profileError ? (
+            <div className="text-red-600">{profileError}</div>
+          ) : profileData ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-lg">{profileData.firstName} {profileData.lastName}</span>
+                <Badge variant="outline" className="ml-2">{profileData.status}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="font-semibold">Age:</span> {profileData.age}</div>
+                <div><span className="font-semibold">Gender:</span> {profileData.gender}</div>
+                <div><span className="font-semibold">Phone:</span> {profileData.phone}</div>
+                <div><span className="font-semibold">Email:</span> {profileData.email}</div>
+                <div><span className="font-semibold">Doctor:</span> {profileData.doctor}</div>
+                <div><span className="font-semibold">Bed:</span> {profileData.bed}</div>
+              </div>
+            </div>
+          ) : null}
+          <DialogClose asChild>
+            <Button variant="outline" className="mt-4 w-full">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>Edit Patient</DialogTitle>
+            <DialogDescription>Update patient details</DialogDescription>
+          </DialogHeader>
+          {editPatient && (
+            <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleEditSave(); }}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editFirstName">First Name</Label>
+                  <Input id="editFirstName" value={editPatient.firstName} onChange={e => setEditPatient({ ...editPatient, firstName: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editLastName">Last Name</Label>
+                  <Input id="editLastName" value={editPatient.lastName} onChange={e => setEditPatient({ ...editPatient, lastName: e.target.value })} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editAge">Age</Label>
+                  <Input id="editAge" type="number" value={editPatient.age} onChange={e => setEditPatient({ ...editPatient, age: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editGender">Gender</Label>
+                  <Input id="editGender" value={editPatient.gender} onChange={e => setEditPatient({ ...editPatient, gender: e.target.value })} required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editPhone">Phone</Label>
+                <Input id="editPhone" value={editPatient.phone} onChange={e => setEditPatient({ ...editPatient, phone: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editDoctor">Doctor</Label>
+                <Input id="editDoctor" value={editPatient.doctor} onChange={e => setEditPatient({ ...editPatient, doctor: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editBed">Bed</Label>
+                <Input id="editBed" value={editPatient.bed} onChange={e => setEditPatient({ ...editPatient, bed: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editEmail">Email</Label>
+                <Input id="editEmail" value={editPatient.email} onChange={e => setEditPatient({ ...editPatient, email: e.target.value })} required />
+              </div>
+              {editError && <div className="text-red-600 text-sm">{editError}</div>}
+              <Button type="submit" className="w-full" disabled={editLoading}>{editLoading ? "Saving..." : "Save Changes"}</Button>
+            </form>
+          )}
+          <DialogClose asChild>
+            <Button variant="outline" className="mt-4 w-full">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   )
 }

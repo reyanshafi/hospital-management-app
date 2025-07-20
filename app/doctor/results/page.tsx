@@ -1,8 +1,7 @@
-// app/patient/results/page.tsx
 "use client";
 import useSWR from "swr";
 import { useEffect, useState } from "react";
-import { PatientSidebar } from "@/components/patient-sidebar";
+import { DoctorSidebar } from "@/components/doctor-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TestTube, Download, Eye, Calendar, User, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 
-export default function PatientResults() {
+export default function DoctorResults() {
   const [userData, setUserData] = useState<any>(null);
   useEffect(() => {
     try {
@@ -26,10 +25,10 @@ export default function PatientResults() {
   }, []);
 
   const { data, error, isLoading } = useSWR(
-    userData?._id ? `/api/patient/results?patientId=${encodeURIComponent(userData._id)}` : null,
+    userData?.name ? `/api/doctor/results?doctorName=${encodeURIComponent(userData.name)}` : null,
     (url) => fetch(url).then(res => res.json())
   );
-  const results = data || [];
+  const results = data?.results || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -60,7 +59,7 @@ export default function PatientResults() {
 
   return (
     <SidebarProvider>
-      <PatientSidebar />
+      <DoctorSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-gradient-to-r from-blue-50 to-purple-50">
           <SidebarTrigger className="-ml-1" />
@@ -73,8 +72,8 @@ export default function PatientResults() {
         <div className="flex-1 space-y-6 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-blue-600">My Test Results</h2>
-              <p className="text-gray-600">View and download your lab reports and imaging studies</p>
+              <h2 className="text-3xl font-bold tracking-tight text-blue-600">Patient Test Results</h2>
+              <p className="text-gray-600">View all lab reports and imaging studies for your patients</p>
             </div>
             <div className="text-sm text-gray-600">
               <span className="font-medium">{results.filter((r: any) => r.status === 'ready').length}</span> results ready
@@ -216,4 +215,4 @@ export default function PatientResults() {
       </SidebarInset>
     </SidebarProvider>
   );
-}
+} 

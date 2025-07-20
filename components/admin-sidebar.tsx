@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { Users, Stethoscope, Bed, Settings, BarChart3, Bell, LogOut, Shield } from "lucide-react"
+import { Users, Stethoscope, Bed, Settings, BarChart3, Bell, LogOut, Shield, FileText, Pill, TestTube, CalendarCheck2 } from "lucide-react"
 
 import {
   Sidebar,
@@ -40,6 +40,27 @@ const adminNavItems = [
     title: "Bed Management",
     url: "/admin/beds",
     icon: Bed,
+  },
+  {
+    title: "Prescriptions",
+    url: "/admin/prescriptions",
+    icon: Pill,
+  },
+  {
+    title: "Medical Records",
+    url: "/admin/records",
+    icon: FileText,
+  },
+  {
+  title: "Manage Appointments",
+    url: "/admin/appointments",
+    icon: CalendarCheck2,
+  },
+
+  {
+    title: "Manage Results",
+    url: "/admin/results",
+    icon: TestTube,
   },
   {
     title: "Emergency Alerts",

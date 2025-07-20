@@ -70,47 +70,52 @@ export function PatientSidebar({ ...props }: React.ComponentProps<typeof Sidebar
   }
 
   return (
-    <Sidebar className="border-r" {...props}>
-      {/* Header */}
-      <SidebarHeader className="border-b bg-white p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-            <Heart className="h-5 w-5 text-white" />
+    <Sidebar {...props} className="bg-gradient-to-b from-green-50/60 via-white/80 to-blue-50/40 border-r border-green-100/40 shadow-xl rounded-r-2xl backdrop-blur-md">
+      <SidebarHeader className="border-b border-green-100/40 bg-gradient-to-r from-green-50/60 to-blue-50/60 rounded-t-2xl">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <div className="p-2 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl shadow-lg">
+            <Heart className="h-6 w-6 text-white" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">MediCare Portal</p>
-            <p className="text-xs text-gray-500">Patient Dashboard</p>
+            <p className="text-sm font-bold bg-gradient-to-r from-green-800 to-blue-700 bg-clip-text text-transparent">Patient Portal</p>
+            <p className="text-xs text-green-700 font-medium">MediCare System</p>
           </div>
         </div>
       </SidebarHeader>
-
-      {/* Navigation */}
-      <SidebarContent className="px-4 py-4">
+      <SidebarContent className="py-6">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase mb-3">
+          <SidebarGroupLabel className="px-4 text-xs font-semibold text-green-700 uppercase tracking-wider mb-2">
             Healthcare
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="px-3 space-y-1">
               {patientNavItems.map((item) => {
                 const isActive = pathname === item.url
                 const isEmergency = item.isEmergency
-                
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
-                      className={`h-10 rounded-lg transition-colors duration-200 ${
-                        isActive 
-                          ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                          : isEmergency
-                            ? 'hover:bg-red-50 text-red-600 hover:text-red-700'
-                            : 'hover:bg-gray-100 text-gray-700'
-                      }`}
+                    <SidebarMenuButton
+                      asChild
+                      className={`group relative rounded-xl transition-all duration-300 border border-transparent px-2 py-1.5 flex items-center gap-3
+                        ${isActive ? 'bg-gradient-to-r from-green-200/80 to-green-100/80 shadow font-bold text-green-900 border-green-300' :
+                          isEmergency ? 'hover:bg-red-50 text-red-600 hover:text-red-700' :
+                          'hover:bg-green-50/60 text-green-700'}
+                      `}
                     >
-                      <a href={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{item.title}</span>
+                      <a href={item.url} className="flex items-center gap-3 w-full">
+                        <span className={`p-2 rounded-lg shadow-sm transition-all duration-300 border border-green-100/60
+                          ${isActive ? 'bg-green-100/80' : 'bg-white/80 group-hover:bg-green-50/80'}`}
+                        >
+                          <item.icon className={`h-4 w-4 ${isActive ? 'text-green-700' : 'text-green-500 group-hover:text-green-700'}`} />
+                        </span>
+                        <span className="font-medium text-sm truncate">
+                          {item.title}
+                        </span>
+                        {item.isEmergency && (
+                          <div className="ml-auto">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                          </div>
+                        )}
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -120,17 +125,21 @@ export function PatientSidebar({ ...props }: React.ComponentProps<typeof Sidebar
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      {/* Footer */}
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t border-green-100/40 bg-gradient-to-r from-green-50/60 to-blue-50/60 p-3 rounded-b-2xl">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
-              className="h-10 w-full rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors duration-200"
+              className="group w-full rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 hover:shadow-sm transition-all duration-300 border border-transparent hover:border-red-200/50"
             >
-              <LogOut className="h-4 w-4" />
-              <span className="text-sm font-medium">Sign Out</span>
+              <div className="flex items-center gap-3 px-3 py-2.5 w-full">
+                <div className="p-2 rounded-lg bg-white/80 group-hover:bg-red-100 group-hover:shadow-sm transition-all duration-300 border border-green-100/50 group-hover:border-red-200">
+                  <LogOut className="h-4 w-4 text-green-700 group-hover:text-red-600 transition-colors duration-300" />
+                </div>
+                <span className="font-medium text-green-700 group-hover:text-red-700 transition-colors duration-300">
+                  Sign Out
+                </span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

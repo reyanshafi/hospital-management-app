@@ -1,6 +1,6 @@
 "use client"
 import type React from "react"
-import { Calendar, Users, FileText, Pill, Activity, Bell, Settings, LogOut, Stethoscope } from "lucide-react"
+import { Calendar, Users, FileText, Pill, Activity, Bell, Settings, LogOut, Stethoscope, TestTube } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +40,11 @@ const doctorNavItems = [
     title: "Prescriptions",
     url: "/doctor/prescriptions",
     icon: Pill,
+  },
+  {
+    title: "Test Results",
+    url: "/doctor/results",
+    icon: TestTube,
   },
   {
     title: "Emergency Alerts",

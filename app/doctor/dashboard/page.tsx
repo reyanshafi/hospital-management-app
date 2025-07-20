@@ -32,22 +32,26 @@ export default function DoctorDashboard() {
   // Real-time fetch for appointments, alerts, and patients
   const { data: appointmentsData, isLoading: appointmentsLoading } = useSWR(
     userData?.email ? `/api/doctor/appointments?doctorEmail=${encodeURIComponent(userData.email)}` : null,
-    (url) => fetch(url).then(res => res.json()),
-    { refreshInterval: 5000 }
+    (url) => fetch(url).then(res => res.json())
   );
   const { data: alertsData, isLoading: alertsLoading } = useSWR(
     userData?.email ? `/api/doctor/alerts?doctorEmail=${encodeURIComponent(userData.email)}` : null,
-    (url) => fetch(url).then(res => res.json()),
-    { refreshInterval: 5000 }
+    (url) => fetch(url).then(res => res.json())
   );
   const { data: patientsData, isLoading: patientsLoading } = useSWR(
     userData?.email ? `/api/doctor/patients?doctorEmail=${encodeURIComponent(userData.email)}` : null,
-    (url) => fetch(url).then(res => res.json()),
-    { refreshInterval: 5000 }
+    (url) => fetch(url).then(res => res.json())
   );
   const appointments = appointmentsData?.appointments || [];
   const alerts = alertsData?.alerts || [];
   const patients = patientsData?.patients || [];
+
+  // Real-time fetch for medical records
+  const { data: recordsData, isLoading: recordsLoading } = useSWR(
+    userData?.name ? `/api/doctor/records?doctorName=${encodeURIComponent(userData.name)}` : null,
+    (url) => fetch(url).then(res => res.json())
+  );
+  const records = recordsData?.records || [];
 
   if (!userData) return null;
 
@@ -68,6 +72,14 @@ export default function DoctorDashboard() {
         </header>
         {/* Main Content with Modern Layout */}
         <div className="flex-1 space-y-8 p-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 min-h-screen">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="appointments">Appointments</TabsTrigger>
+              <TabsTrigger value="patients">My Patients</TabsTrigger>
+              <TabsTrigger value="records">Medical Records</TabsTrigger>
+            </TabsList>
+            <TabsContent value="dashboard">
           {/* Welcome Section */}
           <div className="flex items-center justify-between">
             <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent">
@@ -266,6 +278,47 @@ export default function DoctorDashboard() {
               </CardContent>
             </Card>
           </div>
+            </TabsContent>
+            <TabsContent value="records">
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-slate-900">Medical Records</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {recordsLoading ? (
+                    <div>Loading...</div>
+                  ) : records.length === 0 ? (
+                    <div className="text-gray-500">No medical records found for your patients.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {records.map((rec: any, idx: number) => (
+                            <tr key={rec._id || idx} className="hover:bg-blue-50">
+                              <td className="px-4 py-2 font-semibold">{rec.patient?.firstName} {rec.patient?.lastName}</td>
+                              <td className="px-4 py-2">{rec.type}</td>
+                              <td className="px-4 py-2">{rec.date}</td>
+                              <td className="px-4 py-2">
+                                <Badge variant={rec.status === "Completed" ? "default" : "secondary"}>{rec.status}</Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </SidebarInset>
     </SidebarProvider>
