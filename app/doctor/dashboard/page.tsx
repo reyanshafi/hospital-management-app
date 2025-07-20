@@ -10,10 +10,12 @@ import { Calendar, Users, FileText, AlertTriangle, Clock, Phone, Stethoscope } f
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function DoctorDashboard() {
   const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState("dashboard");
   useEffect(() => {
     // Get session from cookie
     try {
@@ -53,17 +55,22 @@ export default function DoctorDashboard() {
     <SidebarProvider>
       <DoctorSidebar />
       <SidebarInset>
-        {/* Enhanced Header */}
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-gradient-to-r from-slate-50 to-blue-50/80 px-4 shadow-sm">
-          <SidebarTrigger className="-ml-1 hover:bg-white/70 transition-colors rounded-lg" />
-          <Separator orientation="vertical" className="mr-2 h-4 bg-slate-300" />
-          <h1 className="text-lg font-semibold bg-gradient-to-r from-slate-800 to-blue-700 bg-clip-text text-transparent">Doctor Dashboard</h1>
+        {/* Modern Header with Gradient */}
+        <header className="flex h-20 shrink-0 items-center gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-8 shadow-lg">
+          <SidebarTrigger className="-ml-1 text-white hover:bg-white/10 rounded-lg p-2" />
+          <Separator orientation="vertical" className="mr-2 h-6 bg-white/20" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+              <Stethoscope className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-white">Doctor Dashboard</h1>
+          </div>
         </header>
-        
-        <div className="flex-1 space-y-4 p-4 pt-6 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30 min-h-screen">
-          {/* Enhanced Welcome Section */}
+        {/* Main Content with Modern Layout */}
+        <div className="flex-1 space-y-8 p-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 min-h-screen">
+          {/* Welcome Section */}
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent">
               Welcome back, {userData.name}
             </h2>
             <div className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-blue-100">
@@ -71,8 +78,7 @@ export default function DoctorDashboard() {
               <span className="text-sm text-muted-foreground font-medium">Medical Practice</span>
             </div>
           </div>
-
-          {/* Enhanced Emergency Alerts Banner */}
+          {/* Emergency Alerts Banner */}
           {alerts.length > 0 && (
             <Card className="border-red-200 bg-gradient-to-r from-red-50 to-orange-50/80 shadow-md hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
@@ -114,9 +120,8 @@ export default function DoctorDashboard() {
               </CardContent>
             </Card>
           )}
-
-          {/* Enhanced Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Stats Cards */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Today's Appointments</CardTitle>
@@ -129,7 +134,6 @@ export default function DoctorDashboard() {
                 <p className="text-xs text-blue-100">Live count</p>
               </CardContent>
             </Card>
-
             <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -142,7 +146,6 @@ export default function DoctorDashboard() {
                 <p className="text-xs text-emerald-100">Under your care</p>
               </CardContent>
             </Card>
-
             <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
@@ -155,7 +158,6 @@ export default function DoctorDashboard() {
                 <p className="text-xs text-purple-100">Medical records</p>
               </CardContent>
             </Card>
-
             <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Emergency Alerts</CardTitle>
@@ -169,9 +171,8 @@ export default function DoctorDashboard() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Enhanced Schedule and Quick Actions */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          {/* Schedule and Quick Actions */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
             <Card className="col-span-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle className="flex items-center space-x-2">
@@ -223,7 +224,6 @@ export default function DoctorDashboard() {
                 </div>
               </CardContent>
             </Card>
-
             <Card className="col-span-3 shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Quick Actions</CardTitle>
@@ -269,5 +269,5 @@ export default function DoctorDashboard() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

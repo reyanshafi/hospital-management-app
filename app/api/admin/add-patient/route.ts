@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/lib/mongoose";
 // @ts-ignore
 const Patient = require("@/models/Patient");
 import bcrypt from "bcryptjs";
+// @ts-ignore
+const Bed = require("@/models/Bed");
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +21,11 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const patient = await Patient.create({ firstName, lastName, age, gender, phone, doctor, bed, email, password: hashedPassword });
+    // Mark the bed as unavailable and assign the patient
+    await Bed.findOneAndUpdate(
+      { number: bed },
+      { available: false, patient: patient._id }
+    );
     return NextResponse.json({ message: "Patient created successfully", patient: { firstName, lastName, email } }, { status: 201 });
   } catch (err: any) {
     console.log("Add Patient Error:", err);

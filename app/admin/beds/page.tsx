@@ -6,27 +6,37 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import useSWR from "swr";
 import { Button } from "@/components/ui/button";
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-function useBeds() {
-  const { data, error, isLoading } = useSWR("/api/admin/beds", fetcher, { refreshInterval: 5000 });
-  return {
-    beds: data?.beds || [],
-    isLoading,
-    error,
-  };
-}
+import { Edit } from "lucide-react";
 
 export default function AdminBeds() {
-  const { beds, isLoading } = useBeds();
-  const totalBeds = beds.length;
-  const assignedBeds = beds.filter((bed: any) => !bed.available);
+  const [beds, setBeds] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [fetchError, setFetchError] = React.useState("");
+  const fetchBeds = async () => {
+    setIsLoading(true);
+    setFetchError("");
+    try {
+      const res = await fetch("/api/admin/beds");
+      if (!res.ok) throw new Error("Failed to fetch beds");
+      const data = await res.json();
+      setBeds(data.beds || []);
+    } catch (err: any) {
+      setFetchError(err.message || "Error fetching beds");
+      setBeds([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  React.useEffect(() => {
+    fetchBeds();
+    const interval = setInterval(fetchBeds, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Add Bed form state
   const [bedNumber, setBedNumber] = React.useState("");
+  const [ward, setWard] = React.useState("");
   const [addLoading, setAddLoading] = React.useState(false);
   const [addError, setAddError] = React.useState("");
   const [addSuccess, setAddSuccess] = React.useState("");
@@ -40,7 +50,7 @@ export default function AdminBeds() {
       const res = await fetch("/api/admin/beds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ number: bedNumber }),
+        body: JSON.stringify({ number: bedNumber, ward }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -48,6 +58,7 @@ export default function AdminBeds() {
       } else {
         setAddSuccess("Bed added successfully");
         setBedNumber("");
+        setWard("");
       }
     } catch {
       setAddError("Unexpected error. Please try again.");
@@ -55,6 +66,39 @@ export default function AdminBeds() {
       setAddLoading(false);
     }
   };
+
+  const [editModalOpen, setEditModalOpen] = React.useState(false);
+  const [editBed, setEditBed] = React.useState<any>(null);
+  const [editWard, setEditWard] = React.useState("");
+  const [editAvailable, setEditAvailable] = React.useState(true);
+  const [editLoading, setEditLoading] = React.useState(false);
+  const openEditModal = (bed: any) => {
+    setEditBed(bed);
+    setEditWard(bed.ward || "General");
+    setEditAvailable(bed.available);
+    setEditModalOpen(true);
+  };
+  const handleEditSave = async () => {
+    if (!editBed) return;
+    setEditLoading(true);
+    try {
+      const res = await fetch(`/api/admin/beds?id=${editBed._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ward: editWard, available: editAvailable }),
+      });
+      if (!res.ok) throw new Error("Failed to update bed");
+      setEditModalOpen(false);
+      fetchBeds();
+    } catch {
+      // handle error
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const totalBeds = beds.length;
+  const assignedBeds = beds.filter((bed: any) => !bed.available);
 
   return (
     <SidebarProvider>
@@ -85,6 +129,17 @@ export default function AdminBeds() {
                     required
                     className="w-full border rounded px-3 py-2"
                     placeholder="Enter bed number"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="ward" className="block text-sm font-medium mb-1">Ward</label>
+                  <input
+                    id="ward"
+                    type="text"
+                    value={ward}
+                    onChange={e => setWard(e.target.value)}
+                    className="w-full border rounded px-3 py-2"
+                    placeholder="Enter ward (e.g. General, ICU, Pediatrics)"
                   />
                 </div>
                 <Button type="submit" className="min-w-[120px]" disabled={addLoading}>
@@ -125,6 +180,7 @@ export default function AdminBeds() {
                     <TableHead>Bed Number</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Patient Name</TableHead>
+                    <TableHead>Ward</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -146,6 +202,12 @@ export default function AdminBeds() {
                           </Badge>
                         </TableCell>
                         <TableCell>{bed.patientName || "-"}</TableCell>
+                        <TableCell>{bed.ward || "General"}</TableCell>
+                        <TableCell>
+                          <Button variant="outline" size="sm" onClick={() => openEditModal(bed)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -155,6 +217,44 @@ export default function AdminBeds() {
           </Card>
         </div>
       </SidebarInset>
+      {/* Edit Bed Modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600" onClick={() => setEditModalOpen(false)}>
+              <span className="sr-only">Close</span>
+              &times;
+            </button>
+            <h2 className="text-xl font-bold mb-4">Edit Bed</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Ward</label>
+                <input
+                  type="text"
+                  value={editWard}
+                  onChange={e => setEditWard(e.target.value)}
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Enter ward"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Availability</label>
+                <select
+                  value={editAvailable ? "available" : "assigned"}
+                  onChange={e => setEditAvailable(e.target.value === "available")}
+                  className="w-full border rounded px-3 py-2"
+                >
+                  <option value="available">Available</option>
+                  <option value="assigned">Assigned</option>
+                </select>
+              </div>
+              <Button className="w-full" onClick={handleEditSave} disabled={editLoading}>
+                {editLoading ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </SidebarProvider>
   );
 }

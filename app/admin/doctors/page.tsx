@@ -10,23 +10,31 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search, Edit, Trash2 } from "lucide-react";
-import useSWR from "swr";
-import { Modal } from "@/components/ui/modal"; // If you have a modal component, otherwise use a custom one
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-function useDoctors() {
-  const { data, error, isLoading, mutate } = useSWR("/api/admin/doctors", fetcher, { refreshInterval: 5000 });
-  return {
-    doctors: data?.doctors || [],
-    isLoading,
-    error,
-    mutate,
-  };
-}
 
 export default function AdminDoctors() {
-  const { doctors, isLoading, mutate } = useDoctors();
+  const [doctors, setDoctors] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [fetchError, setFetchError] = React.useState("");
+  const fetchDoctors = async () => {
+    setIsLoading(true);
+    setFetchError("");
+    try {
+      const res = await fetch("/api/admin/doctors");
+      if (!res.ok) throw new Error("Failed to fetch doctors");
+      const data = await res.json();
+      setDoctors(data.doctors || []);
+    } catch (err: any) {
+      setFetchError(err.message || "Error fetching doctors");
+      setDoctors([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  React.useEffect(() => {
+    fetchDoctors();
+    const interval = setInterval(fetchDoctors, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const [form, setForm] = React.useState({
     name: "",
     email: "",
@@ -79,7 +87,7 @@ export default function AdminDoctors() {
       } else {
         setSuccess("Doctor added successfully");
         setForm({ name: "", email: "", password: "", phone: "", specialty: "" });
-        mutate();
+        fetchDoctors();
         setTimeout(() => setSuccess(""), 1500);
       }
     } catch {
@@ -114,7 +122,7 @@ export default function AdminDoctors() {
       });
       if (!res.ok) throw new Error("Failed to update doctor");
       setEditModalOpen(false);
-      mutate();
+      fetchDoctors();
     } catch {
       // handle error
     } finally {
@@ -133,7 +141,7 @@ export default function AdminDoctors() {
       const res = await fetch(`/api/admin/doctors?id=${deleteId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete doctor");
       setDeleteModalOpen(false);
-      mutate();
+      fetchDoctors();
     } catch {
       // handle error
     } finally {

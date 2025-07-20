@@ -29,7 +29,7 @@ export default function DoctorAppointments() {
   const { data, error, isLoading } = useSWR(
     userData?.name ? `/api/doctor/appointments?doctorName=${encodeURIComponent(userData.name)}` : null,
     (url) => fetch(url).then(res => res.json()),
-    { refreshInterval: 5000 }
+    { refreshInterval: 1000 }
   );
   const appointments = data?.appointments || [];
 

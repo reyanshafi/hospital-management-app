@@ -6,10 +6,10 @@ const Patient = require("@/models/Patient");
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
-    // Optionally filter by doctor if provided
+    // Optionally filter by doctor name if provided
     const url = new URL(req.url);
-    const doctorEmail = url.searchParams.get("doctorEmail");
-    const query = doctorEmail ? { doctor: doctorEmail } : {};
+    const doctorName = url.searchParams.get("doctorName");
+    const query = doctorName ? { doctor: doctorName } : {};
     const patients = await Patient.find(query);
     return NextResponse.json({ patients });
   } catch (err: any) {

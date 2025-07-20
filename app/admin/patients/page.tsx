@@ -14,38 +14,7 @@ import { UserPlus, Search, Edit, Trash2 } from "lucide-react"
 
 
 
-function usePatients() {
-  const [patients, setPatients] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string>("");
-
-  React.useEffect(() => {
-    let cancelled = false;
-    const fetchPatients = async () => {
-      setIsLoading(true);
-      setError("");
-      try {
-        const res = await fetch("/api/admin/patients");
-        if (!res.ok) throw new Error("Failed to fetch patients");
-        const data = await res.json();
-        if (!cancelled) setPatients(data.patients || []);
-      } catch (err: any) {
-        if (!cancelled) setError(err.message || "Error fetching patients");
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-    fetchPatients();
-    const interval = setInterval(fetchPatients, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-
-  return { patients, isLoading, error };
-}
-
+// useEffect + fetch for patients
 function useAvailableBeds() {
   const [beds, setBeds] = React.useState<any[]>([]);
   React.useEffect(() => {
@@ -67,11 +36,54 @@ function useAvailableBeds() {
   return beds;
 }
 
-const doctors = ["Dr. Smith", "Dr. Johnson", "Dr. Brown", "Dr. Davis", "Dr. Wilson"]
+// Fetch doctors from API
+function useDoctors() {
+  const [doctors, setDoctors] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    let cancelled = false;
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch("/api/admin/doctors");
+        if (!res.ok) throw new Error("Failed to fetch doctors");
+        const data = await res.json();
+        if (!cancelled) setDoctors(data.doctors || []);
+      } catch {
+        if (!cancelled) setDoctors([]);
+      }
+    };
+    fetchDoctors();
+    const interval = setInterval(fetchDoctors, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+  return doctors;
+}
 
 export default function AdminPatients() {
-  const { patients, isLoading } = usePatients();
+  const [patients, setPatients] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [fetchError, setFetchError] = React.useState("");
+  const fetchPatients = async () => {
+    setIsLoading(true);
+    setFetchError("");
+    try {
+      const res = await fetch("/api/admin/patients");
+      if (!res.ok) throw new Error("Failed to fetch patients");
+      const data = await res.json();
+      setPatients(data.patients || []);
+    } catch (err: any) {
+      setFetchError(err.message || "Error fetching patients");
+      setPatients([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  React.useEffect(() => {
+    fetchPatients();
+    const interval = setInterval(fetchPatients, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const availableBeds = useAvailableBeds();
+  const doctors = useDoctors();
   // Add New Patient form state and handler
   const [form, setForm] = React.useState({
     firstName: "",
@@ -199,13 +211,16 @@ export default function AdminPatients() {
                           <SelectValue placeholder="Select doctor" />
                         </SelectTrigger>
                         <SelectContent>
-                          {doctors.map((doctor) => (
-                            <SelectItem key={doctor} value={doctor}>
-                              {doctor}
+                          {doctors.map((doctor: any) => (
+                            <SelectItem key={doctor._id} value={doctor.name}>
+                              {doctor.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {doctors.length === 0 && (
+                        <div className="text-red-600 text-xs mt-1">No doctors found</div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="assignBed">Assign Bed</Label>

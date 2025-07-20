@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { Users, Stethoscope, Bed, Settings, BarChart3, Bell, LogOut, Shield, FileText, CalendarCheck2 } from "lucide-react"
+import { Users, Stethoscope, Bed, Settings, BarChart3, Bell, LogOut, Shield } from "lucide-react"
 
 import {
   Sidebar,
@@ -42,16 +42,6 @@ const adminNavItems = [
     icon: Bed,
   },
   {
-    title: "Medical Records",
-    url: "/admin/records",
-    icon: FileText,
-  },
-  {
-    title: "Manage Appointments",
-    url: "/admin/appointments",
-    icon: CalendarCheck2,
-  },
-  {
     title: "Emergency Alerts",
     url: "/admin/alerts",
     icon: Bell,
@@ -63,16 +53,14 @@ const adminNavItems = [
   },
 ]
 
-export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const handleSignOut = () => {
-    document.cookie = 'session=; Max-Age=0; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
-    window.location.href = '/'
-  }
-
+    document.cookie = 'session=; Max-Age=0; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    window.location.href = '/';
+  };
   return (
     <Sidebar className="border-r" {...props}>
-      {/* Header */}
       <SidebarHeader className="border-b bg-white p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
@@ -84,8 +72,6 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           </div>
         </div>
       </SidebarHeader>
-
-      {/* Navigation */}
       <SidebarContent className="px-4 py-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase mb-3">
@@ -114,14 +100,12 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )
+                );
               })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      {/* Footer */}
       <SidebarFooter className="border-t p-4">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -137,5 +121,5 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
