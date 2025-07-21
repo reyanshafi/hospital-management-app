@@ -87,6 +87,9 @@ export default function PatientAppointments() {
   const openBookingModal = () => {
     setShowModal(true);
     fetchDoctors();
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    setForm({ ...form, date: today });
   };
 
   const closeBookingModal = () => {
@@ -200,6 +203,7 @@ export default function PatientAppointments() {
                       name="date"
                       value={form.date}
                       onChange={handleFormChange}
+                      min={new Date().toISOString().split('T')[0]}
                       required
                       className="w-full border rounded px-3 py-2"
                     />

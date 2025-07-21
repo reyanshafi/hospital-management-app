@@ -18,6 +18,16 @@ export async function POST(req: Request) {
     if (!patient || !doctor || !date || !time || !type) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
+    
+    // Validate date - only allow today or future dates
+    const selectedDate = new Date(date)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Reset time to start of day for comparison
+    
+    if (selectedDate < today) {
+      return NextResponse.json({ error: "Cannot book appointments for past dates" }, { status: 400 })
+    }
+    
     const appointment = await Appointment.create({
       patient,
       doctor,
